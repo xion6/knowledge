@@ -1,8 +1,9 @@
 # Docker 個人知識ベース
 
-## 1. セットアップ（Colima）
+## Colima をセットアップする
 
-macOS では Docker Desktop の代替として Colima を使う。
+> [!info] なぜ Colima か
+> macOS では Docker Desktop の代替として使う。Docker Desktop はライセンス制限があるが、Colima は OSS で無料。VM 上で Docker デーモンを動かす仕組みは同じ。
 
 ### インストール
 
@@ -37,16 +38,14 @@ colima start
 colima stop
 ```
 
-ホスト再起動時の自動起動を設定する。
+ホスト再起動時の自動起動
 
 ```bash
 brew services start colima  # 有効化
 brew services stop colima   # 無効化
 ```
 
----
-
-## 2. コンテナ基本操作
+## コンテナを操作する
 
 ### 確認
 
@@ -65,7 +64,7 @@ docker rm <container>
 docker rm $(docker ps -aq)                        # 停止中を一括削除
 ```
 
-### 操作
+### シェル・ログ・ファイル
 
 ```bash
 docker exec -it <container> /bin/bash       # コンテナ内に入る
@@ -74,9 +73,7 @@ docker logs -f <container>                  # ログをフォロー
 docker cp      <container>:/path/to/file .  # ファイルをコピー
 ```
 
----
-
-## 3. 環境変数の渡し方
+## 環境変数を渡す
 
 ### コマンドラインで指定
 
@@ -109,9 +106,7 @@ services:
       - .env
 ```
 
----
-
-## 4. イメージ操作
+## イメージを管理する
 
 ```bash
 docker images         # 一覧
@@ -127,20 +122,7 @@ docker build -t <name>:<tag> .
 docker build -t <name>:<tag> -f <Dockerfile path> .
 ```
 
----
-
-## 5. ディスク・キャッシュ管理
-
-```bash
-docker system df        # 使用量の確認
-docker builder prune    # ビルドキャッシュ削除
-docker image prune -a   # 未使用イメージを全削除
-docker system prune -a  # コンテナ・イメージ・キャッシュを一括削除
-```
-
----
-
-## 6. docker compose
+## docker compose で複数コンテナを扱う
 
 ```bash
 docker compose up -d                      # バックグラウンドで起動
@@ -153,9 +135,7 @@ docker compose build                      # イメージをビルド
 docker compose pull                       # イメージを更新
 ```
 
----
-
-## 7. データボリューム
+## データを永続化する（ボリューム）
 
 ### named volume（推奨）
 
@@ -182,21 +162,19 @@ docker run --name=bb-container -v bb-volume:/shared busybox
 docker run --rm --volumes-from bb-container -it ubuntu /bin/bash
 ```
 
-> `docker container prune` でコンテナを削除してもボリューム自体は残る。
+`docker container prune` でコンテナを削除してもボリューム自体は残る。
 
-### バックアップ
+### バックアップ・リストア
 
 ```bash
+# バックアップ
 docker run --rm \
   --volumes-from bb-container \
   -v $HOME/backup:/backup \
   ubuntu \
   tar cvf /backup/container-bkup.tar -C / shared
-```
 
-### リストア
-
-```bash
+# リストア
 docker run --rm \
   --volumes-from bb-container \
   -v $HOME/backup:/backup \
@@ -204,11 +182,10 @@ docker run --rm \
   tar xvf /backup/container-bkup.tar -C /
 ```
 
----
+## 使い捨て環境として使う
 
-## 8. 使い捨て環境
-
-`--rm` でコンテナ終了時に自動削除。環境を汚さずに試せる。
+> [!info] なぜ使い捨て環境か
+> `--rm` でコンテナ終了時に自動削除される。ローカル環境を汚さずに任意のランタイムを試せる。バージョン違いの動作確認や、インストールしたくないツールの一時実行に使う。
 
 ```bash
 # Python の即席 REPL
@@ -224,9 +201,7 @@ docker run --rm -it ubuntu:24.04 /bin/bash
 docker run --rm -v $(pwd):/work -w /work golang:1.22 go build ./...
 ```
 
----
-
-## 9. DB のクイック起動
+## DB をすぐ立ち上げる
 
 > データ永続化が必要な場合は `-v` でボリュームをマウントし、`--rm` を外す。
 
@@ -258,9 +233,7 @@ docker run --rm --name mysql \
   mysql:8
 ```
 
----
-
-## 10. デバッグ・調査
+## 調査・デバッグする
 
 コンテナの詳細情報（ネットワーク・マウント・環境変数など）を確認する。
 
@@ -280,4 +253,13 @@ docker stats <container>
 
 ```bash
 docker top <container>
+```
+
+## ディスクを掃除する
+
+```bash
+docker system df        # 使用量の確認
+docker builder prune    # ビルドキャッシュ削除
+docker image prune -a   # 未使用イメージを全削除
+docker system prune -a  # コンテナ・イメージ・キャッシュを一括削除
 ```
