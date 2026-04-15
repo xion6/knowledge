@@ -5,8 +5,8 @@
 ### グローバル設定
 
 ```bash
-git config --global user.name "xion6"
-git config --global user.email "u.xion6@gmail.com"
+git config --global user.name "<your-name>"
+git config --global user.email "<your-email>"
 git config --global core.editor "vim"
 ```
 
@@ -45,7 +45,7 @@ GitHub CLI で認証してリポジトリを作成・接続
 ```bash
 gh auth login
 gh repo create {リポジトリ名} --private --description "{説明}"
-git remote add origin https://github.com/xion6/{リポジトリ名}.git
+git remote add origin https://github.com/<username>/{リポジトリ名}.git
 git branch -M main
 git push -u origin main
 ```
