@@ -166,6 +166,23 @@ git branch -u origin/foo bar
 git branch -vv
 ```
 
+### 強制プッシュ（履歴書き換え後）
+
+> [!info] `--force` と `--force-with-lease` の違い
+> `--force` は無条件に上書きするため、fetch 後に他の人がプッシュしていても消す。
+> `--force-with-lease` は「自分が最後に fetch した時点のリモート ref」と照合し、
+> 差分があれば失敗する。rebase / amend 後の再プッシュには常にこちらを使う。
+
+```bash
+git push --force-with-lease
+```
+
+ref を絞ってチェックする場合（特定ブランチのみ安全確認したいとき）
+
+```bash
+git push --force-with-lease=<refname>
+```
+
 ## 履歴を見る
 
 ```bash
