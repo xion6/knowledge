@@ -1,4 +1,5 @@
 *.draft.md
 .claude/*
 !.claude/skills
-.obsidian/
+.obsidian/*
+draft/*
