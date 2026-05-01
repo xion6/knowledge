@@ -182,17 +182,29 @@ function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
 
 ## useRef
 
-「再レンダーをトリガーしない可変値の入れ物」と「DOMノードへの参照」の二役を担うフック。`ref.current`に値を書き込んでも再レンダーは走らない。
+再レンダーをまたいで値を保持する「箱」を作るフック。`useRef(初期値)`は`{ current: 初期値 }`という形のオブジェクトを返し、`.current`に値を入れたり読んだりして使う。
+
+```tsx
+const ref = useRef(0);
+ref.current;      // 0
+ref.current = 5;  // 書き換えても再レンダーは起きない
+```
+
+`useState`との一番大きな違いは「書き換えても再レンダーが走らない」こと。この性質から、用途は次の2つに分かれる。
+
+- 画面に出さない可変値の保持（タイマーID、外部ライブラリのインスタンスなど）
+- DOMノードへの参照（focusやscrollなど、命令的に触りたいとき）
 
 ### DOM要素を参照する
 
-focus、scroll、video再生、外部ライブラリ（Mapboxなど）へのDOMノード受け渡しのように、宣言的に表現できない命令的操作で使う。
+JSXの`ref`属性にrefオブジェクトを渡すと、Reactがマウント時にそのDOM要素を`.current`に詰めてくれる（アンマウント時は`null`に戻す）。focus・scroll・video再生・外部ライブラリ（Mapboxなど）へのDOMノード受け渡しのように、propsでは表現できない命令的操作で使う。
 
 ```tsx
 function SearchBox() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // .current には実際の <input> 要素が入っている
     inputRef.current?.focus();
   }, []);
 
@@ -201,11 +213,11 @@ function SearchBox() {
 ```
 
 > [!info] なぜstateやpropsで済まないか
-> 値や`disabled`はpropsで宣言できるが、focus・scroll・`play()`はDOMノードに対する命令でpropsの形では表現できない。Reactの宣言的世界から「外」に出る必要があるときの出口がref。
+> `value`や`disabled`はpropsで宣言できるが、focus・scroll・`play()`はDOMノードに対する命令で、propsの形では表現できない。Reactの宣言的な世界から「外」に出るときの出口がref。
 
 ### 再レンダーしない可変値を持つ
 
-コンポーネントの寿命の間、値を保持したいが、UIには反映しなくていい場面で使う。
+コンポーネントの寿命の間、値を保持したいが、UIには反映しなくていい場面で使う。「`useState`にしてもいいけど、画面に出さないから再レンダーは無駄」というときがrefの出番。
 
 - タイマーID・IntervalID（クリーンアップ時に参照したい）
 - 外部ライブラリのインスタンス（WebSocket、Mapインスタンスなど）
